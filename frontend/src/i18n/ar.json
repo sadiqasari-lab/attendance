@@ -1,0 +1,123 @@
+{
+  "app": {
+    "title": "إنسباير للحضور",
+    "subtitle": "نظام إدارة الحضور"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "attendance": "الحضور",
+    "map": "الخريطة المباشرة",
+    "employees": "الموظفين",
+    "shifts": "الورديات",
+    "geofences": "النطاق الجغرافي",
+    "devices": "الأجهزة",
+    "approvals": "الموافقات",
+    "reports": "التقارير",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "login_button": "تسجيل الدخول",
+    "logging_in": "جاري تسجيل الدخول...",
+    "forgot_password": "نسيت كلمة المرور؟",
+    "login_error": "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+  },
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "total_employees": "إجمالي الموظفين",
+    "present_today": "الحاضرون اليوم",
+    "late_today": "المتأخرون اليوم",
+    "absent_today": "الغائبون اليوم",
+    "attendance_overview": "نظرة عامة على الحضور",
+    "recent_activity": "النشاط الأخير",
+    "weekly_trend": "الاتجاه الأسبوعي"
+  },
+  "attendance": {
+    "title": "سجلات الحضور",
+    "date": "التاريخ",
+    "employee": "الموظف",
+    "shift": "الوردية",
+    "clock_in": "تسجيل الدخول",
+    "clock_out": "تسجيل الخروج",
+    "status": "الحالة",
+    "duration": "المدة",
+    "validated": "تم التحقق",
+    "filter_by_date": "تصفية حسب التاريخ",
+    "filter_by_status": "تصفية حسب الحالة",
+    "present": "حاضر",
+    "absent": "غائب",
+    "late": "متأخر",
+    "early_departure": "مغادرة مبكرة",
+    "half_day": "نصف يوم",
+    "on_leave": "في إجازة",
+    "correction_request": "طلب تصحيح",
+    "no_records": "لا توجد سجلات حضور"
+  },
+  "admin": {
+    "employees": {
+      "title": "إدارة الموظفين",
+      "add": "إضافة موظف",
+      "id": "رقم الموظف",
+      "name": "الاسم",
+      "department": "القسم",
+      "designation": "المسمى الوظيفي",
+      "status": "الحالة"
+    },
+    "shifts": {
+      "title": "إدارة الورديات",
+      "add": "إضافة وردية",
+      "name": "اسم الوردية",
+      "start": "وقت البدء",
+      "end": "وقت الانتهاء",
+      "grace": "فترة السماح (دقائق)"
+    },
+    "geofences": {
+      "title": "إدارة النطاق الجغرافي",
+      "add": "إضافة نطاق",
+      "name": "الاسم",
+      "lat": "خط العرض",
+      "lng": "خط الطول",
+      "radius": "النطاق (متر)"
+    },
+    "devices": {
+      "title": "إدارة الأجهزة",
+      "model": "الطراز",
+      "platform": "المنصة",
+      "type": "النوع",
+      "status": "الحالة",
+      "approve": "موافقة",
+      "revoke": "إلغاء"
+    }
+  },
+  "map": {
+    "title": "خريطة الحضور المباشرة",
+    "employees_online": "الموظفون المتصلون",
+    "last_update": "آخر تحديث"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "profile": "الملف الشخصي",
+    "change_password": "تغيير كلمة المرور",
+    "language": "اللغة",
+    "theme": "المظهر",
+    "dark_mode": "الوضع الداكن",
+    "light_mode": "الوضع الفاتح",
+    "save": "حفظ التغييرات"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "search": "بحث",
+    "actions": "الإجراءات",
+    "no_data": "لا توجد بيانات",
+    "confirm_delete": "هل أنت متأكد من حذف هذا العنصر؟",
+    "success": "تمت العملية بنجاح",
+    "error": "حدث خطأ"
+  }
+}

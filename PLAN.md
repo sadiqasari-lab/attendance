@@ -88,21 +88,23 @@ for Arab Inspire Company (Riyadh) and its tenants.
 
 ---
 
-## Phase 2: Web Frontend (Future)
+## Phase 2: Web Frontend
 ### Milestone 2.1 — React Project Setup
-- [ ] React app with modular architecture
-- [ ] RTL Arabic support
-- [ ] Dark/Light theme system
-- [ ] Auth module (JWT integration)
+- [√] Vite + React 19 + TypeScript project scaffold
+- [√] Tailwind CSS with dark mode + RTL Arabic support
+- [√] i18next with English + Arabic translations
+- [√] Zustand state management (auth + theme stores)
+- [√] Central API client with JWT auto-refresh
+- [√] Protected routes with RBAC role gating
 
 ### Milestone 2.2 — Dashboard & Admin
-- [ ] Dashboard module (attendance overview, charts)
-- [ ] Admin module (tenant/employee/shift management)
-- [ ] Settings module
+- [√] Dashboard module (stat cards, Chart.js doughnut + bar charts, summary table)
+- [√] Admin modules: Employees, Shifts, Geofences, Devices management
+- [√] Settings module (profile, theme/language toggle, password change)
 
 ### Milestone 2.3 — Attendance & Map
-- [ ] Attendance module (records, corrections)
-- [ ] Map module (WebSocket live tracking)
+- [√] Attendance records module (filterable table with date/status filters)
+- [√] Real-time attendance map (WebSocket, Leaflet markers, event stream)
 
 ---
 
