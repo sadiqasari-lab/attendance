@@ -83,7 +83,7 @@ for Arab Inspire Company (Riyadh) and its tenants.
 - [√] Biometric service tests
 - [√] API endpoint tests
 - [√] Permission/RBAC tests
-- [ ] Load testing (500 concurrent users)
+- [√] Load testing (500 concurrent users) — Locust scenarios
 - Target: 85%+ coverage
 
 ---
