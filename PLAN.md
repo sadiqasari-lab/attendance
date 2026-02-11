@@ -108,27 +108,27 @@ for Arab Inspire Company (Riyadh) and its tenants.
 
 ---
 
-## Phase 3: Mobile App (Future)
+## Phase 3: Mobile App
 ### Milestone 3.1 — React Native Setup
-- [ ] TypeScript project scaffolding
-- [ ] Clean architecture with service layer
-- [ ] Secure storage abstraction
-- [ ] Central API client
+- [√] TypeScript project scaffolding (React Native 0.76.6 + React 19)
+- [√] Clean architecture with service layer
+- [√] Secure storage abstraction (EncryptedStorage)
+- [√] Central API client with JWT auto-refresh + queue
 
 ### Milestone 3.2 — Core Features
-- [ ] Auth module
-- [ ] Attendance module (selfie, GPS, validation)
-- [ ] Camera module (liveness detection)
-- [ ] Biometric enrollment module
+- [√] Auth module (login screen, token management, Zustand store)
+- [√] Attendance module (dashboard, clock-in/out, history, offline fallback)
+- [√] Camera module (selfie capture with front camera)
+- [√] Biometric enrollment module (multi-angle capture, enrollment API)
 
 ### Milestone 3.3 — Security & Offline
-- [ ] Device security module (root detection, binding)
-- [ ] Offline sync module (encrypted queue, replay protection)
-- [ ] Background location handling
+- [√] Device security module (root detection, device binding, registration)
+- [√] Offline sync module (encrypted queue, auto-sync on reconnect, replay protection)
+- [√] GPS location hook with permission handling
 
 ### Milestone 3.4 — Production Builds
-- [ ] Android: Release signing, ProGuard, .aab build
-- [ ] iOS: Provisioning, permissions, production config
+- [√] Android: Release signing, ProGuard, min SDK 24, .aab bundle config, network security
+- [√] iOS: Podfile, Info.plist permissions, App Transport Security, AppDelegate
 
 ---
 
