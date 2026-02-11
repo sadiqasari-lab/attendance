@@ -64,17 +64,6 @@ services:
       redis:
         condition: service_healthy
 
-  nginx:
-    image: nginx:1.25-alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
-    depends_on:
-      - backend
-
 volumes:
   postgres_data:
   static_volume:

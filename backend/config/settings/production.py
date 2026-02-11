@@ -23,12 +23,6 @@ LOGGING = {
         },
     },
     "handlers": {
-        "file": {
-            "level": "WARNING",
-            "class": "logging.FileHandler",
-            "filename": "/app/logs/django.log",
-            "formatter": "verbose",
-        },
         "console": {
             "level": "INFO",
             "class": "logging.StreamHandler",
@@ -36,17 +30,17 @@ LOGGING = {
         },
     },
     "root": {
-        "handlers": ["console", "file"],
+        "handlers": ["console"],
         "level": "INFO",
     },
     "loggers": {
         "django": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"],
             "level": "WARNING",
             "propagate": False,
         },
         "apps": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"],
             "level": "INFO",
             "propagate": False,
         },
