@@ -25,7 +25,7 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 COPY backend/ /app/
 
-RUN mkdir -p /app/staticfiles /app/media
+RUN mkdir -p /app/staticfiles /app/media /app/logs
 
 RUN adduser --disabled-password --no-create-home appuser \
     && chown -R appuser:appuser /app
