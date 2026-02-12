@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
+import * as L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import type { MapAttendanceEvent } from "@/types";
 
 export function AttendanceMapPage() {
@@ -112,7 +114,6 @@ export function AttendanceMapPage() {
 
 /**
  * Map content component — renders Leaflet map with employee markers.
- * Falls back to a placeholder if Leaflet isn't available at runtime.
  */
 function MapContent({ events }: { events: MapAttendanceEvent[] }) {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -120,13 +121,6 @@ function MapContent({ events }: { events: MapAttendanceEvent[] }) {
   const markersRef = useRef<Map<string, L.Marker>>(new Map());
 
   useEffect(() => {
-    let L: typeof import("leaflet") | undefined;
-    try {
-      L = require("leaflet");
-    } catch {
-      return; // Leaflet not available
-    }
-
     if (!mapRef.current || leafletMapRef.current) return;
 
     // Default to Riyadh center
@@ -144,13 +138,6 @@ function MapContent({ events }: { events: MapAttendanceEvent[] }) {
   }, []);
 
   useEffect(() => {
-    let L: typeof import("leaflet") | undefined;
-    try {
-      L = require("leaflet");
-    } catch {
-      return;
-    }
-
     const map = leafletMapRef.current;
     if (!map) return;
 
@@ -168,7 +155,7 @@ function MapContent({ events }: { events: MapAttendanceEvent[] }) {
           }`
         );
       } else {
-        const marker = L!
+        const marker = L
           .marker([lat, lng])
           .addTo(map)
           .bindPopup(
@@ -183,6 +170,3 @@ function MapContent({ events }: { events: MapAttendanceEvent[] }) {
 
   return <div ref={mapRef} className="h-full w-full" />;
 }
-
-// Type declaration for dynamic import
-declare const L: typeof import("leaflet");

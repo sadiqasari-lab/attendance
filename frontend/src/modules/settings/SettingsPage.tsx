@@ -13,7 +13,7 @@ interface PasswordForm {
 
 export function SettingsPage() {
   const { t, i18n } = useTranslation();
-  const { user, loadProfile } = useAuthStore();
+  const { user } = useAuthStore();
   const { theme, setTheme, language, setLanguage } = useThemeStore();
   const [successMsg, setSuccessMsg] = useState("");
   const [errorMsg, setErrorMsg] = useState("");

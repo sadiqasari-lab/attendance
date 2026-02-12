@@ -10,7 +10,7 @@ import {
 
 export function Header() {
   const { t, i18n } = useTranslation();
-  const { logout, user } = useAuthStore();
+  const { logout } = useAuthStore();
   const { theme, toggleTheme, language, setLanguage } = useThemeStore();
 
   const handleLanguageToggle = () => {

@@ -27,16 +27,12 @@ export function DashboardPage() {
   const { t } = useTranslation();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const [summary, setSummary] = useState<AttendanceSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     if (!tenantSlug) return;
-    setLoading(true);
     attendanceService
       .getSummary(tenantSlug)
       .then((res) => setSummary(res.data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
+      .catch(() => {});
   }, [tenantSlug]);
 
   // Aggregate stats
