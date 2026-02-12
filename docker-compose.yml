@@ -24,7 +24,8 @@ services:
   backend:
     image: ghcr.io/sadiqasari-lab/attendance/backend:latest
     command: >
-      sh -c "python manage.py migrate --noinput &&
+      sh -c "mkdir -p /app/logs &&
+             python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
              gunicorn config.asgi:application -k uvicorn.workers.UvicornWorker -b 0.0.0.0:8000 -w 4 --timeout 120"
     volumes:
@@ -42,7 +43,9 @@ services:
 
   celery_worker:
     image: ghcr.io/sadiqasari-lab/attendance/backend:latest
-    command: celery -A config worker -l info -c 4
+    command: >
+      sh -c "mkdir -p /app/logs &&
+             celery -A config worker -l info -c 4"
     volumes:
       - media_volume:/app/media
     env_file:
@@ -55,7 +58,9 @@ services:
 
   celery_beat:
     image: ghcr.io/sadiqasari-lab/attendance/backend:latest
-    command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: >
+      sh -c "mkdir -p /app/logs &&
+             celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler"
     env_file:
       - .env
     depends_on:
