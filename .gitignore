@@ -45,7 +45,9 @@ htmlcov/
 # Docker
 *.log
 
-# Node (for future frontend)
+# Node / Frontend
 node_modules/
 npm-debug.log
 yarn-error.log
+*.tsbuildinfo
+frontend/dist/
