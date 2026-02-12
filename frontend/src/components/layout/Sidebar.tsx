@@ -24,7 +24,47 @@ interface NavItem {
 export function Sidebar() {
   const { t } = useTranslation();
   const { tenant, user } = useAuthStore();
-  const slug = tenant?.slug ?? "";
+  const slug = tenant?.slug;
+
+  // If no tenant yet, the sidebar nav links can't work — show minimal sidebar
+  if (!slug) {
+    return (
+      <aside className="fixed inset-y-0 start-0 z-30 flex w-64 flex-col border-e border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+        <div className="flex h-16 items-center gap-3 border-b border-gray-200 px-6 dark:border-gray-700">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white font-bold text-sm">
+            IA
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+              {t("app.title")}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {t("app.subtitle")}
+            </p>
+          </div>
+        </div>
+        <nav className="flex-1 overflow-y-auto px-3 py-4">
+          <ul className="space-y-1">
+            <li>
+              <NavLink
+                to="/onboarding"
+                className={({ isActive }) =>
+                  `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400"
+                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+                  }`
+                }
+              >
+                <RocketLaunchIcon className="h-5 w-5 shrink-0" />
+                {t("nav.onboarding")}
+              </NavLink>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+    );
+  }
 
   const navItems: NavItem[] = [
     { path: `/${slug}/dashboard`, label: t("nav.dashboard"), icon: HomeIcon },

@@ -35,6 +35,7 @@ export function OnboardingPage() {
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const navigate = useNavigate();
   const { tenant } = useAuthStore();
+  const effectiveSlug = tenantSlug || tenant?.slug;
 
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -78,7 +79,11 @@ export function OnboardingPage() {
 
   // Load existing data
   useEffect(() => {
-    if (!tenantSlug) return;
+    if (!effectiveSlug) {
+      // No tenant yet — this is a fresh setup, skip loading and go straight to form
+      setLoading(false);
+      return;
+    }
 
     const loadData = async () => {
       setLoading(true);
@@ -98,7 +103,7 @@ export function OnboardingPage() {
 
         // Load existing departments
         try {
-          const deptRes = await tenantService.getDepartments(tenantSlug);
+          const deptRes = await tenantService.getDepartments(effectiveSlug);
           setDepartments(deptRes.results ?? []);
         } catch {
           // no departments yet
@@ -106,7 +111,7 @@ export function OnboardingPage() {
 
         // Load existing shifts
         try {
-          const shiftRes = await attendanceService.getShifts(tenantSlug);
+          const shiftRes = await attendanceService.getShifts(effectiveSlug);
           setShifts(shiftRes.results ?? []);
         } catch {
           // no shifts yet
@@ -114,7 +119,7 @@ export function OnboardingPage() {
 
         // Load existing geofences
         try {
-          const geoRes = await attendanceService.getGeofences(tenantSlug);
+          const geoRes = await attendanceService.getGeofences(effectiveSlug);
           setGeofences(geoRes.results ?? []);
         } catch {
           // no geofences yet
@@ -125,11 +130,11 @@ export function OnboardingPage() {
     };
 
     loadData();
-  }, [tenantSlug, tenant]);
+  }, [effectiveSlug, tenant]);
 
   // Step actions
   const handleAddDepartment = async () => {
-    if (!tenantSlug || !newDept.name) return;
+    if (!effectiveSlug || !newDept.name) return;
     setSaving(true);
     try {
       // Use a direct API call to create department
@@ -137,7 +142,7 @@ export function OnboardingPage() {
       const { data } = await api.post(`/tenants/departments/`, {
         name: newDept.name,
         name_ar: newDept.name_ar,
-        tenant_slug: tenantSlug,
+        tenant_slug: effectiveSlug,
       });
       setDepartments([...departments, data.data ?? data]);
       setNewDept({ name: "", name_ar: "" });
@@ -145,7 +150,7 @@ export function OnboardingPage() {
       // try alternative approach
       try {
         const { default: api } = await import("@/services/api");
-        const { data } = await api.post(`/${tenantSlug}/attendance/departments/`, {
+        const { data } = await api.post(`/${effectiveSlug}/attendance/departments/`, {
           name: newDept.name,
           name_ar: newDept.name_ar,
         });
@@ -160,10 +165,10 @@ export function OnboardingPage() {
   };
 
   const handleAddShift = async () => {
-    if (!tenantSlug || !newShift.name) return;
+    if (!effectiveSlug || !newShift.name) return;
     setSaving(true);
     try {
-      const result = await attendanceService.createShift(tenantSlug, {
+      const result = await attendanceService.createShift(effectiveSlug!, {
         name: newShift.name,
         name_ar: newShift.name_ar,
         start_time: newShift.start_time,
@@ -186,10 +191,10 @@ export function OnboardingPage() {
   };
 
   const handleAddGeofence = async () => {
-    if (!tenantSlug || !newGeofence.name) return;
+    if (!effectiveSlug || !newGeofence.name) return;
     setSaving(true);
     try {
-      const result = await attendanceService.createGeofence(tenantSlug, {
+      const result = await attendanceService.createGeofence(effectiveSlug!, {
         name: newGeofence.name,
         name_ar: newGeofence.name_ar,
         latitude: newGeofence.latitude,
@@ -212,9 +217,9 @@ export function OnboardingPage() {
   };
 
   const handleDeleteShift = async (id: string) => {
-    if (!tenantSlug) return;
+    if (!effectiveSlug) return;
     try {
-      await attendanceService.deleteShift(tenantSlug, id);
+      await attendanceService.deleteShift(effectiveSlug!, id);
       setShifts(shifts.filter((s) => s.id !== id));
     } catch {
       // silently fail
@@ -222,9 +227,9 @@ export function OnboardingPage() {
   };
 
   const handleDeleteGeofence = async (id: string) => {
-    if (!tenantSlug) return;
+    if (!effectiveSlug) return;
     try {
-      await attendanceService.deleteGeofence(tenantSlug, id);
+      await attendanceService.deleteGeofence(effectiveSlug!, id);
       setGeofences(geofences.filter((g) => g.id !== id));
     } catch {
       // silently fail
@@ -252,7 +257,10 @@ export function OnboardingPage() {
           {t("onboarding.completed_desc")}
         </p>
         <button
-          onClick={() => navigate(`/${tenantSlug}/dashboard`)}
+          onClick={() => {
+            const slug = effectiveSlug || useAuthStore.getState().tenant?.slug;
+            navigate(slug ? `/${slug}/dashboard` : "/", { replace: true });
+          }}
           className="btn-primary mt-6"
         >
           {t("onboarding.go_dashboard")}

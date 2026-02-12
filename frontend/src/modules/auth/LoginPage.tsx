@@ -29,7 +29,10 @@ export function LoginPage() {
     try {
       await login(formData.email, formData.password);
       const tenant = useAuthStore.getState().tenant;
-      navigate(from ?? `/${tenant?.slug ?? ""}/dashboard`, { replace: true });
+      const destination = tenant?.slug
+        ? (from ?? `/${tenant.slug}/dashboard`)
+        : "/onboarding";
+      navigate(destination, { replace: true });
     } catch {
       // Error handled by store
     }

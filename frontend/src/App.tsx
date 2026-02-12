@@ -98,12 +98,26 @@ function App() {
           <Route index element={<Navigate to="dashboard" replace />} />
         </Route>
 
+        {/* Top-level onboarding (no tenant required) */}
+        <Route
+          path="/onboarding"
+          element={
+            <ProtectedRoute allowedRoles={["SUPER_ADMIN", "TENANT_ADMIN"]}>
+              <OnboardingPage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Root redirect */}
         <Route
           path="/"
           element={
-            isAuthenticated && tenant ? (
-              <Navigate to={`/${tenant.slug}/dashboard`} replace />
+            isAuthenticated ? (
+              tenant?.slug ? (
+                <Navigate to={`/${tenant.slug}/dashboard`} replace />
+              ) : (
+                <Navigate to="/onboarding" replace />
+              )
             ) : (
               <Navigate to="/login" replace />
             )
