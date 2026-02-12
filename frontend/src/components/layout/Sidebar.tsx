@@ -11,6 +11,7 @@ import {
   DevicePhoneMobileIcon,
   CheckCircleIcon,
   Cog6ToothIcon,
+  RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
 
 interface NavItem {
@@ -58,6 +59,12 @@ export function Sidebar() {
       label: t("nav.approvals"),
       icon: CheckCircleIcon,
       roles: ["SUPER_ADMIN", "TENANT_ADMIN", "MANAGER"],
+    },
+    {
+      path: `/${slug}/onboarding`,
+      label: t("nav.onboarding"),
+      icon: RocketLaunchIcon,
+      roles: ["SUPER_ADMIN", "TENANT_ADMIN"],
     },
     { path: `/${slug}/settings`, label: t("nav.settings"), icon: Cog6ToothIcon },
   ];

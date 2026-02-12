@@ -16,6 +16,8 @@ import { ShiftsPage } from "@/modules/admin/ShiftsPage";
 import { GeofencesPage } from "@/modules/admin/GeofencesPage";
 import { DevicesPage } from "@/modules/admin/DevicesPage";
 import { SettingsPage } from "@/modules/settings/SettingsPage";
+import { ApprovalsPage } from "@/modules/approvals/ApprovalsPage";
+import { OnboardingPage } from "@/modules/onboarding/OnboardingPage";
 
 function App() {
   const { isAuthenticated, loadProfile, tenant } = useAuthStore();
@@ -73,6 +75,22 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["SUPER_ADMIN", "TENANT_ADMIN", "MANAGER"]}>
                 <DevicesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="approvals"
+            element={
+              <ProtectedRoute allowedRoles={["SUPER_ADMIN", "TENANT_ADMIN", "MANAGER"]}>
+                <ApprovalsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="onboarding"
+            element={
+              <ProtectedRoute allowedRoles={["SUPER_ADMIN", "TENANT_ADMIN"]}>
+                <OnboardingPage />
               </ProtectedRoute>
             }
           />

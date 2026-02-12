@@ -262,6 +262,35 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+// --- Approvals ---
+export type ApprovalRequestType = "ATTENDANCE_CORRECTION" | "DEVICE_CHANGE" | "LEAVE_REQUEST";
+export type ApprovalStatus = "PENDING" | "APPROVED" | "REJECTED" | "CANCELLED";
+export type ApprovalPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+
+export interface ApprovalRequest {
+  id: string;
+  tenant: string;
+  request_type: ApprovalRequestType;
+  request_type_display: string;
+  requester: string;
+  requester_name: string;
+  requester_employee_id: string;
+  status: ApprovalStatus;
+  status_display: string;
+  title: string;
+  description: string;
+  metadata: Record<string, unknown>;
+  reviewed_by: string | null;
+  reviewer_name: string | null;
+  reviewed_at: string | null;
+  review_notes: string;
+  priority: ApprovalPriority;
+  priority_display: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+}
+
 // --- Audit ---
 export interface AuditLog {
   id: string;
