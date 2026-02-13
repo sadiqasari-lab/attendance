@@ -5,6 +5,12 @@ from django.db import models
 from apps.core.models import ActiveManager, TenantBaseModel
 
 
+def _tenant_selfie_upload_path(instance, filename):
+    """Return a tenant-scoped upload path for selfie images."""
+    tenant_slug = instance.tenant.slug if instance.tenant else "unknown"
+    return f"tenants/{tenant_slug}/attendance/selfies/{filename}"
+
+
 # ---------------------------------------------------------------------------
 # Shift
 # ---------------------------------------------------------------------------
@@ -261,14 +267,14 @@ class AttendanceRecord(TenantBaseModel):
         max_digits=10, decimal_places=7, null=True, blank=True
     )
 
-    # Selfie images
+    # Selfie images (tenant-scoped upload path)
     clock_in_selfie = models.ImageField(
-        upload_to="attendance/selfies/",
+        upload_to=_tenant_selfie_upload_path,
         null=True,
         blank=True,
     )
     clock_out_selfie = models.ImageField(
-        upload_to="attendance/selfies/",
+        upload_to=_tenant_selfie_upload_path,
         null=True,
         blank=True,
     )

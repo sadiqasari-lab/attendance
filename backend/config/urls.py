@@ -16,8 +16,12 @@ from apps.core.backup_views import (
     BackupListView,
     BackupRestoreView,
 )
+from apps.core.health_views import healthz, readyz
 
 urlpatterns = [
+    # Health checks (unauthenticated, for container orchestration)
+    path("healthz", healthz, name="healthz"),
+    path("readyz", readyz, name="readyz"),
     # Admin
     path("admin/", admin.site.urls),
     # API v1
