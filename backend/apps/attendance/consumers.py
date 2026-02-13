@@ -15,13 +15,38 @@ class AttendanceMapConsumer(JsonWebsocketConsumer):
     """
 
     def connect(self):
+        # Authenticate: reject anonymous connections
+        user = self.scope.get("user")
+        if not user or user.is_anonymous:
+            self.close()
+            return
+
         self.tenant_slug = self.scope["url_route"]["kwargs"]["tenant_slug"]
+
+        # Verify the user belongs to this tenant
+        if user.role != "SUPER_ADMIN":
+            from apps.tenants.models import Tenant
+
+            tenant_exists = Tenant.objects.filter(
+                slug=self.tenant_slug, is_deleted=False
+            ).exists()
+            if not tenant_exists:
+                self.close()
+                return
+
+            has_access = user.employee_profiles.filter(
+                tenant__slug=self.tenant_slug, is_deleted=False
+            ).exists()
+            if not has_access:
+                self.close()
+                return
+
         self.group_name = f"attendance_map_{self.tenant_slug}"
 
         # Join the tenant attendance group
         self.channel_layer.group_add(self.group_name, self.channel_name)
         self.accept()
-        logger.info("WebSocket connected: %s", self.group_name)
+        logger.info("WebSocket connected: user=%s group=%s", user, self.group_name)
 
     def disconnect(self, close_code):
         self.channel_layer.group_discard(self.group_name, self.channel_name)

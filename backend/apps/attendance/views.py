@@ -225,8 +225,14 @@ class AttendanceSummaryView(APIView):
         elif request.user.role not in ("SUPER_ADMIN", "TENANT_ADMIN", "MANAGER"):
             records = records.filter(employee__user=request.user)
 
+        # Single aggregated query — avoids N+1 by computing total hours in DB
         employees = (
-            records.values("employee__id", "employee__employee_id", "employee__user__first_name", "employee__user__last_name")
+            records.values(
+                "employee__id",
+                "employee__employee_id",
+                "employee__user__first_name",
+                "employee__user__last_name",
+            )
             .annotate(
                 total_days=Count("id"),
                 present_count=Count("id", filter=Q(status="PRESENT")),
@@ -235,17 +241,19 @@ class AttendanceSummaryView(APIView):
                 early_departure_count=Count("id", filter=Q(status="EARLY_DEPARTURE")),
                 half_day_count=Count("id", filter=Q(status="HALF_DAY")),
                 leave_count=Count("id", filter=Q(status="ON_LEAVE")),
+                total_duration=Coalesce(
+                    Sum(
+                        F("clock_out_time") - F("clock_in_time"),
+                        filter=Q(clock_out_time__isnull=False),
+                    ),
+                    timedelta(0),
+                ),
             )
         )
 
         summaries = []
         for emp in employees:
-            emp_records = records.filter(employee__id=emp["employee__id"])
-            total_hours = 0.0
-            for r in emp_records.filter(clock_out_time__isnull=False):
-                if r.duration_hours:
-                    total_hours += r.duration_hours
-
+            total_hours = emp["total_duration"].total_seconds() / 3600.0
             days = emp["total_days"] or 1
             summaries.append({
                 "employee_id": emp["employee__id"],

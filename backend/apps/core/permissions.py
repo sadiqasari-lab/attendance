@@ -25,7 +25,7 @@ class IsTenantAdmin(BasePermission):
             return False
         tenant = getattr(request, "tenant", None)
         if not tenant:
-            return True
+            return False
         return request.user.employee_profiles.filter(
             tenant=tenant, is_deleted=False
         ).exists()
@@ -43,7 +43,7 @@ class IsManager(BasePermission):
             return False
         tenant = getattr(request, "tenant", None)
         if not tenant:
-            return True
+            return False
         return request.user.employee_profiles.filter(
             tenant=tenant, is_deleted=False
         ).exists()
@@ -59,7 +59,7 @@ class IsEmployee(BasePermission):
             return True
         tenant = getattr(request, "tenant", None)
         if not tenant:
-            return True
+            return False
         return request.user.employee_profiles.filter(
             tenant=tenant, is_deleted=False
         ).exists()

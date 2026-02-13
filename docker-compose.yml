@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:16-alpine
+    restart: unless-stopped
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -15,6 +16,7 @@ services:
 
   redis:
     image: redis:7-alpine
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -23,6 +25,7 @@ services:
 
   backend:
     image: ghcr.io/sadiqasari-lab/attendance/backend:latest
+    restart: unless-stopped
     command: >
       sh -c "mkdir -p /app/logs &&
              python manage.py migrate --noinput &&
@@ -43,6 +46,7 @@ services:
 
   celery_worker:
     image: ghcr.io/sadiqasari-lab/attendance/backend:latest
+    restart: unless-stopped
     command: >
       sh -c "mkdir -p /app/logs &&
              celery -A config worker -l info -c 4"
@@ -58,6 +62,7 @@ services:
 
   celery_beat:
     image: ghcr.io/sadiqasari-lab/attendance/backend:latest
+    restart: unless-stopped
     command: >
       sh -c "mkdir -p /app/logs &&
              celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler"

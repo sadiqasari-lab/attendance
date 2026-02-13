@@ -1,6 +1,8 @@
 """URL configuration for Inspire Attendance System."""
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
@@ -33,8 +35,28 @@ urlpatterns = [
     path("api/v1/backups/restore/", BackupRestoreView.as_view(), name="backup-restore"),
     path("api/v1/backups/<str:filename>/download/", BackupDownloadView.as_view(), name="backup-download"),
     path("api/v1/backups/<str:filename>/", BackupDeleteView.as_view(), name="backup-delete"),
-    # API Documentation
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
-    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    # API Documentation (authenticated access only; public in DEBUG mode)
+    path(
+        "api/schema/",
+        SpectacularAPIView.as_view(
+            permission_classes=[] if settings.DEBUG else [IsAuthenticated]
+        ),
+        name="schema",
+    ),
+    path(
+        "api/docs/",
+        SpectacularSwaggerView.as_view(
+            url_name="schema",
+            permission_classes=[] if settings.DEBUG else [IsAuthenticated],
+        ),
+        name="swagger-ui",
+    ),
+    path(
+        "api/redoc/",
+        SpectacularRedocView.as_view(
+            url_name="schema",
+            permission_classes=[] if settings.DEBUG else [IsAuthenticated],
+        ),
+        name="redoc",
+    ),
 ]

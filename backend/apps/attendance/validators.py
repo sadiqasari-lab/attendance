@@ -53,6 +53,13 @@ class AttendanceValidator:
         self.policy = policy
         self.errors: list[str] = []
 
+        # Validation result flags — consumed by AttendanceService when
+        # creating an AttendanceRecord.
+        self.geofence_valid: bool = False
+        self.wifi_valid: bool = False
+        self.device_valid: bool = False
+        self.clock_skew_detected: bool = False
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -248,6 +255,7 @@ class AttendanceValidator:
     def validate_geofence(self) -> None:
         """Verify the employee is within the assigned geofence radius."""
         if self.policy and not self.policy.require_geofence:
+            self.geofence_valid = True
             return
 
         geofence = self.data.get("geofence")
@@ -294,6 +302,8 @@ class AttendanceValidator:
                 f"You are {distance:.0f}m away from the geofence "
                 f"'{geofence.name}' (allowed radius: {radius}m)."
             )
+        else:
+            self.geofence_valid = True
 
     # ------------------------------------------------------------------
     # 7. WiFi validation
@@ -301,6 +311,7 @@ class AttendanceValidator:
     def validate_wifi(self) -> None:
         """Check the device WiFi SSID matches a registered WiFi policy."""
         if self.policy and not self.policy.require_wifi:
+            self.wifi_valid = True
             return
 
         ssid = self.data.get("wifi_ssid") or self.data.get("clock_in_wifi_ssid")
@@ -322,6 +333,7 @@ class AttendanceValidator:
 
         if not wifi_policies.exists():
             # No WiFi policies configured — skip check
+            self.wifi_valid = True
             return
 
         bssid = self.data.get("wifi_bssid") or self.data.get("clock_in_wifi_bssid", "")
@@ -343,6 +355,8 @@ class AttendanceValidator:
                 f"WiFi network '{ssid}' is not registered. Connect to an "
                 f"approved office network."
             )
+        else:
+            self.wifi_valid = True
 
     # ------------------------------------------------------------------
     # 8. Device registration
@@ -350,6 +364,7 @@ class AttendanceValidator:
     def validate_device(self) -> None:
         """Verify the device is registered for this employee."""
         if self.policy and not self.policy.require_device_registered:
+            self.device_valid = True
             return
 
         device_id = self.data.get("device_id") or self.data.get("clock_in_device_id")
@@ -384,6 +399,8 @@ class AttendanceValidator:
                     "This device is not registered for your account. "
                     "Please register your device first."
                 )
+            else:
+                self.device_valid = True
         except Exception:
             logger.exception("Error checking device registration")
             self.errors.append("Unable to verify device registration.")
@@ -519,6 +536,7 @@ class AttendanceValidator:
         skew_seconds = abs((server_now - client_timestamp).total_seconds())
 
         if skew_seconds > CLOCK_SKEW_TOLERANCE:
+            self.clock_skew_detected = True
             self.errors.append(
                 f"Device clock skew detected ({skew_seconds:.0f}s). "
                 f"Maximum allowed difference is {CLOCK_SKEW_TOLERANCE}s. "
