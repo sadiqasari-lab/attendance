@@ -3,6 +3,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from . import views
+from .report_views import AttendanceReportView, ExportExcelView, ExportPdfView
 
 router = DefaultRouter()
 router.register("shifts", views.ShiftViewSet, basename="shift")
@@ -17,5 +18,9 @@ urlpatterns = [
     path("clock-out/", views.ClockOutView.as_view(), name="clock-out"),
     path("offline-sync/", views.OfflineSyncView.as_view(), name="offline-sync"),
     path("summary/", views.AttendanceSummaryView.as_view(), name="attendance-summary"),
+    # Reports & Export
+    path("reports/", AttendanceReportView.as_view(), name="attendance-report"),
+    path("reports/export/excel/", ExportExcelView.as_view(), name="report-export-excel"),
+    path("reports/export/pdf/", ExportPdfView.as_view(), name="report-export-pdf"),
     path("", include(router.urls)),
 ]

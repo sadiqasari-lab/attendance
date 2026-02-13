@@ -10,6 +10,7 @@ import {
   MapPinIcon,
   DevicePhoneMobileIcon,
   CheckCircleIcon,
+  ChartBarIcon,
   Cog6ToothIcon,
   RocketLaunchIcon,
 } from "@heroicons/react/24/outline";
@@ -98,6 +99,12 @@ export function Sidebar() {
       path: `/${slug}/approvals`,
       label: t("nav.approvals"),
       icon: CheckCircleIcon,
+      roles: ["SUPER_ADMIN", "TENANT_ADMIN", "MANAGER"],
+    },
+    {
+      path: `/${slug}/reports`,
+      label: t("nav.reports"),
+      icon: ChartBarIcon,
       roles: ["SUPER_ADMIN", "TENANT_ADMIN", "MANAGER"],
     },
     {

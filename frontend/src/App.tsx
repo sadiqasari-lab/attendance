@@ -18,6 +18,7 @@ import { DevicesPage } from "@/modules/admin/DevicesPage";
 import { SettingsPage } from "@/modules/settings/SettingsPage";
 import { ApprovalsPage } from "@/modules/approvals/ApprovalsPage";
 import { OnboardingPage } from "@/modules/onboarding/OnboardingPage";
+import { ReportsPage } from "@/modules/reports/ReportsPage";
 
 function App() {
   const { isAuthenticated, loadProfile, tenant } = useAuthStore();
@@ -83,6 +84,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["SUPER_ADMIN", "TENANT_ADMIN", "MANAGER"]}>
                 <ApprovalsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="reports"
+            element={
+              <ProtectedRoute allowedRoles={["SUPER_ADMIN", "TENANT_ADMIN", "MANAGER"]}>
+                <ReportsPage />
               </ProtectedRoute>
             }
           />

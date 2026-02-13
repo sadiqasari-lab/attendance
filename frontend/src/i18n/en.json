@@ -98,6 +98,25 @@
     "employees_online": "Employees Online",
     "last_update": "Last Update"
   },
+  "reports": {
+    "title": "Attendance Reports",
+    "filters": "Filters",
+    "date_from": "From Date",
+    "date_to": "To Date",
+    "report_type": "Report Type",
+    "type_summary": "Summary",
+    "type_detailed": "Detailed",
+    "export_excel": "Export Excel",
+    "export_pdf": "Export PDF",
+    "employee_id": "Employee ID",
+    "employee_name": "Employee Name",
+    "department": "Department",
+    "total_days": "Total Days",
+    "total_hours": "Total Hours",
+    "avg_hours": "Avg Hours/Day",
+    "no_data": "No report data found. Try adjusting your filters.",
+    "showing_records": "Showing {{count}} records"
+  },
   "settings": {
     "title": "Settings",
     "profile": "Profile",
@@ -106,7 +125,17 @@
     "theme": "Theme",
     "dark_mode": "Dark Mode",
     "light_mode": "Light Mode",
-    "save": "Save Changes"
+    "save": "Save Changes",
+    "backup_restore": "Backup & Restore",
+    "backup_desc": "Create database backups, download them, or restore from a previous backup.",
+    "create_backup": "Create Backup",
+    "restore_from_file": "Restore from File",
+    "restore": "Restore",
+    "download": "Download",
+    "no_backups": "No backups yet. Create your first backup.",
+    "backup_created": "Backup created successfully.",
+    "restore_confirm": "Are you sure? This will overwrite current data with the backup. This action cannot be undone.",
+    "restore_success": "Database restored successfully. Refresh the page to see updated data."
   },
   "approvals": {
     "page_title": "Approval Requests",
