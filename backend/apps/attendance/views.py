@@ -1,7 +1,10 @@
 """Views for the attendance app."""
+import logging
 from datetime import timedelta
 
 from django.db.models import Count, Q, Sum, F
+
+logger = logging.getLogger(__name__)
 from django.db.models.functions import Coalesce
 from django.utils import timezone
 from rest_framework import generics, status, viewsets

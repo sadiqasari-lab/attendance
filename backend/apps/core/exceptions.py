@@ -1,12 +1,41 @@
 """Custom exception handling for consistent API responses."""
+import logging
+
 from rest_framework import status
 from rest_framework.exceptions import APIException
 from rest_framework.views import exception_handler
 
+logger = logging.getLogger(__name__)
+
 
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
+
+    view = context.get("view")
+    request = context.get("request")
+
     if response is not None:
+        if response.status_code >= 500:
+            logger.error(
+                "Server error in %s: %s",
+                view.__class__.__name__ if view else "unknown",
+                exc,
+                exc_info=True,
+                extra={
+                    "status_code": response.status_code,
+                    "user": getattr(request, "user", None),
+                    "path": getattr(request, "path", None),
+                },
+            )
+        elif response.status_code >= 400:
+            logger.warning(
+                "Client error %d in %s: %s",
+                response.status_code,
+                view.__class__.__name__ if view else "unknown",
+                exc,
+                extra={"path": getattr(request, "path", None)},
+            )
+
         response.data = {
             "success": False,
             "error": {
@@ -14,6 +43,15 @@ def custom_exception_handler(exc, context):
                 "detail": response.data,
             },
         }
+    else:
+        # Unhandled exception — log at critical level
+        logger.critical(
+            "Unhandled exception in %s: %s",
+            view.__class__.__name__ if view else "unknown",
+            exc,
+            exc_info=True,
+        )
+
     return response
 
 

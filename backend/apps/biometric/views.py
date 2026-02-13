@@ -1,5 +1,9 @@
 """Views for the biometric app."""
+import logging
+
 from rest_framework import status, viewsets
+
+logger = logging.getLogger(__name__)
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView

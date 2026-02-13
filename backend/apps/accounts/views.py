@@ -1,5 +1,9 @@
 """Views for authentication, user profile, and employee management."""
+import logging
+
 from rest_framework import generics, status, viewsets
+
+logger = logging.getLogger(__name__)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError

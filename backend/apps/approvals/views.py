@@ -1,5 +1,9 @@
 """ViewSets for the approvals app."""
+import logging
+
 from django.db.models import Q
+
+logger = logging.getLogger(__name__)
 from django.utils import timezone
 from rest_framework import serializers, status
 from rest_framework.decorators import action
