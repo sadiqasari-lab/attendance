@@ -27,7 +27,7 @@ function App() {
     if (isAuthenticated) {
       loadProfile();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, loadProfile]);
 
   return (
     <BrowserRouter>

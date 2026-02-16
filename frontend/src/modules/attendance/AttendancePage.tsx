@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import { attendanceService } from "@/services/attendance.service";
@@ -17,12 +17,7 @@ export function AttendancePage() {
   const [dateTo, setDateTo] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
-  useEffect(() => {
-    if (!tenantSlug) return;
-    fetchRecords();
-  }, [tenantSlug, dateFrom, dateTo, statusFilter]);
-
-  const fetchRecords = async () => {
+  const fetchRecords = useCallback(async () => {
     if (!tenantSlug) return;
     setLoading(true);
     try {
@@ -38,7 +33,11 @@ export function AttendancePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tenantSlug, dateFrom, dateTo, statusFilter]);
+
+  useEffect(() => {
+    fetchRecords();
+  }, [fetchRecords]);
 
   const columns = [
     {

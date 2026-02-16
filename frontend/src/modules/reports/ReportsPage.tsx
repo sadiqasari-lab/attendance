@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
 import {
@@ -34,7 +34,7 @@ export function ReportsPage() {
     type: reportType,
   };
 
-  const fetchReport = async () => {
+  const fetchReport = useCallback(async () => {
     if (!tenantSlug) return;
     setLoading(true);
     try {
@@ -45,11 +45,11 @@ export function ReportsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tenantSlug, dateFrom, dateTo, statusFilter, reportType]);
 
   useEffect(() => {
     fetchReport();
-  }, [tenantSlug, dateFrom, dateTo, statusFilter, reportType]);
+  }, [fetchReport]);
 
   const handleExportExcel = async () => {
     if (!tenantSlug) return;

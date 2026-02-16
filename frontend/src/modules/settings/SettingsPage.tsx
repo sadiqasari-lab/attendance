@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "@/store/authStore";
@@ -63,7 +63,7 @@ export function SettingsPage() {
   const [backupMsg, setBackupMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const loadBackups = async () => {
+  const loadBackups = useCallback(async () => {
     if (!isAdmin) return;
     setBackupLoading(true);
     try {
@@ -74,11 +74,11 @@ export function SettingsPage() {
     } finally {
       setBackupLoading(false);
     }
-  };
+  }, [isAdmin]);
 
   useEffect(() => {
     loadBackups();
-  }, [isAdmin]);
+  }, [loadBackups]);
 
   const handleCreateBackup = async () => {
     setBackupCreating(true);

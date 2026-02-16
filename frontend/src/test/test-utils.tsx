@@ -43,14 +43,6 @@ interface WrapperProps {
   children: React.ReactNode;
 }
 
-function AllProviders({ children }: WrapperProps) {
-  return (
-    <I18nextProvider i18n={testI18n}>
-      <MemoryRouter>{children}</MemoryRouter>
-    </I18nextProvider>
-  );
-}
-
 function renderWithProviders(
   ui: ReactElement,
   options?: Omit<RenderOptions, "wrapper"> & { route?: string }
