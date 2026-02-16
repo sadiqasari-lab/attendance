@@ -85,6 +85,11 @@ class TestApprovalRequestModel:
 # ── API tests ────────────────────────────────────────────
 
 
+def _url(tenant_slug, path=""):
+    """Build the full approvals API URL with tenant slug."""
+    return f"/api/v1/{tenant_slug}/approvals/approval-requests/{path}"
+
+
 @pytest.fixture
 def manager_user(db):
     return User.objects.create_user(
@@ -131,20 +136,14 @@ class TestApprovalRequestAPI:
 
     @pytest.mark.django_db
     def test_list_requires_authentication(self, api_client, tenant):
-        resp = api_client.get(
-            "/api/approvals/",
-            HTTP_X_TENANT_SLUG=tenant.slug,
-        )
+        resp = api_client.get(_url(tenant.slug))
         assert resp.status_code == status.HTTP_401_UNAUTHORIZED
 
     @pytest.mark.django_db
     def test_employee_can_list_approvals(
         self, authenticated_client, tenant, employee, approval_request
     ):
-        resp = authenticated_client.get(
-            "/api/approvals/",
-            HTTP_X_TENANT_SLUG=tenant.slug,
-        )
+        resp = authenticated_client.get(_url(tenant.slug))
         assert resp.status_code == status.HTTP_200_OK
 
     @pytest.mark.django_db
@@ -152,7 +151,7 @@ class TestApprovalRequestAPI:
         self, authenticated_client, tenant, employee
     ):
         resp = authenticated_client.post(
-            "/api/approvals/",
+            _url(tenant.slug),
             data={
                 "request_type": "LEAVE_REQUEST",
                 "title": "Sick Leave",
@@ -161,7 +160,6 @@ class TestApprovalRequestAPI:
                 "metadata": {},
             },
             format="json",
-            HTTP_X_TENANT_SLUG=tenant.slug,
         )
         assert resp.status_code in (
             status.HTTP_201_CREATED,
@@ -173,10 +171,9 @@ class TestApprovalRequestAPI:
         self, manager_client, tenant, manager_employee, approval_request
     ):
         resp = manager_client.post(
-            f"/api/approvals/{approval_request.pk}/approve/",
+            _url(tenant.slug, f"{approval_request.pk}/approve/"),
             data={"review_notes": "Approved — enjoy your vacation!"},
             format="json",
-            HTTP_X_TENANT_SLUG=tenant.slug,
         )
         assert resp.status_code == status.HTTP_200_OK
         approval_request.refresh_from_db()
@@ -187,10 +184,9 @@ class TestApprovalRequestAPI:
         self, manager_client, tenant, manager_employee, approval_request
     ):
         resp = manager_client.post(
-            f"/api/approvals/{approval_request.pk}/reject/",
+            _url(tenant.slug, f"{approval_request.pk}/reject/"),
             data={"review_notes": "Insufficient notice period."},
             format="json",
-            HTTP_X_TENANT_SLUG=tenant.slug,
         )
         assert resp.status_code == status.HTTP_200_OK
         approval_request.refresh_from_db()
@@ -204,10 +200,9 @@ class TestApprovalRequestAPI:
         approval_request.save(update_fields=["status"])
 
         resp = manager_client.post(
-            f"/api/approvals/{approval_request.pk}/approve/",
+            _url(tenant.slug, f"{approval_request.pk}/approve/"),
             data={},
             format="json",
-            HTTP_X_TENANT_SLUG=tenant.slug,
         )
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -219,10 +214,9 @@ class TestApprovalRequestAPI:
         approval_request.save(update_fields=["status"])
 
         resp = manager_client.post(
-            f"/api/approvals/{approval_request.pk}/reject/",
+            _url(tenant.slug, f"{approval_request.pk}/reject/"),
             data={},
             format="json",
-            HTTP_X_TENANT_SLUG=tenant.slug,
         )
         assert resp.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -231,8 +225,7 @@ class TestApprovalRequestAPI:
         self, authenticated_client, tenant, employee, approval_request
     ):
         resp = authenticated_client.post(
-            f"/api/approvals/{approval_request.pk}/cancel/",
-            HTTP_X_TENANT_SLUG=tenant.slug,
+            _url(tenant.slug, f"{approval_request.pk}/cancel/"),
         )
         assert resp.status_code == status.HTTP_200_OK
         approval_request.refresh_from_db()
@@ -244,8 +237,7 @@ class TestApprovalRequestAPI:
     ):
         api_client.force_authenticate(user=employee_b.user)
         resp = api_client.post(
-            f"/api/approvals/{approval_request.pk}/cancel/",
-            HTTP_X_TENANT_SLUG=tenant.slug,
+            _url(tenant.slug, f"{approval_request.pk}/cancel/"),
         )
         # Should be 403 because the employee doesn't belong to this tenant
         assert resp.status_code in (
@@ -258,8 +250,7 @@ class TestApprovalRequestAPI:
         self, authenticated_client, tenant, employee, approval_request
     ):
         resp = authenticated_client.get(
-            "/api/approvals/pending-count/",
-            HTTP_X_TENANT_SLUG=tenant.slug,
+            _url(tenant.slug, "pending-count/"),
         )
         assert resp.status_code == status.HTTP_200_OK
         assert "pending_count" in resp.data
@@ -270,9 +261,8 @@ class TestApprovalRequestAPI:
     ):
         initial_count = AuditLog.objects.count()
         manager_client.post(
-            f"/api/approvals/{approval_request.pk}/approve/",
+            _url(tenant.slug, f"{approval_request.pk}/approve/"),
             data={"review_notes": "Looks good"},
             format="json",
-            HTTP_X_TENANT_SLUG=tenant.slug,
         )
         assert AuditLog.objects.count() > initial_count

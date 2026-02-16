@@ -32,7 +32,9 @@ def valid_data(tenant, employee, shift, geofence, device, attendance_policy):
     return {
         "tenant": tenant,
         "employee": employee,
+        "employee_id": employee.id,
         "shift": shift,
+        "shift_id": shift.id,
         "date": timezone.localdate(),
         "selfie": _make_test_image(),
         "latitude": Decimal("24.7136000"),
@@ -56,9 +58,8 @@ class TestAttendanceValidator:
         req = request_factory.post("/")
         req.tenant = tenant
         validator = AttendanceValidator(valid_data, req)
-        errors = []
-        validator._validate_selfie(errors)
-        assert len(errors) == 0
+        validator.validate_selfie()
+        assert len(validator.errors) == 0
 
     @pytest.mark.django_db
     def test_validate_selfie_missing(self, valid_data, request_factory, tenant):
@@ -66,18 +67,16 @@ class TestAttendanceValidator:
         req = request_factory.post("/")
         req.tenant = tenant
         validator = AttendanceValidator(valid_data, req)
-        errors = []
-        validator._validate_selfie(errors)
-        assert len(errors) > 0
+        validator.validate_selfie()
+        assert len(validator.errors) > 0
 
     @pytest.mark.django_db
     def test_validate_liveness_passed(self, valid_data, request_factory, tenant):
         req = request_factory.post("/")
         req.tenant = tenant
         validator = AttendanceValidator(valid_data, req)
-        errors = []
-        validator._validate_liveness(errors)
-        assert len(errors) == 0
+        validator.validate_liveness()
+        assert len(validator.errors) == 0
 
     @pytest.mark.django_db
     def test_validate_liveness_failed(self, valid_data, request_factory, tenant):
@@ -85,9 +84,8 @@ class TestAttendanceValidator:
         req = request_factory.post("/")
         req.tenant = tenant
         validator = AttendanceValidator(valid_data, req)
-        errors = []
-        validator._validate_liveness(errors)
-        assert len(errors) > 0
+        validator.validate_liveness()
+        assert len(validator.errors) > 0
 
     @pytest.mark.django_db
     def test_validate_fake_gps_detected(self, valid_data, request_factory, tenant):
@@ -95,17 +93,15 @@ class TestAttendanceValidator:
         req = request_factory.post("/")
         req.tenant = tenant
         validator = AttendanceValidator(valid_data, req)
-        errors = []
-        validator._validate_fake_gps(errors)
-        assert len(errors) > 0
+        validator.validate_fake_gps()
+        assert len(validator.errors) > 0
 
     @pytest.mark.django_db
     def test_validate_geofence_within(self, valid_data, request_factory, tenant, geofence):
         req = request_factory.post("/")
         req.tenant = tenant
         validator = AttendanceValidator(valid_data, req)
-        errors = []
-        validator._validate_geofence(errors)
+        validator.validate_geofence()
         assert validator.geofence_valid is True
 
     @pytest.mark.django_db
@@ -115,8 +111,7 @@ class TestAttendanceValidator:
         req = request_factory.post("/")
         req.tenant = tenant
         validator = AttendanceValidator(valid_data, req)
-        errors = []
-        validator._validate_geofence(errors)
+        validator.validate_geofence()
         assert validator.geofence_valid is False
 
     @pytest.mark.django_db
@@ -124,8 +119,7 @@ class TestAttendanceValidator:
         req = request_factory.post("/")
         req.tenant = tenant
         validator = AttendanceValidator(valid_data, req)
-        errors = []
-        validator._validate_device(errors)
+        validator.validate_device()
         assert validator.device_valid is True
 
     @pytest.mark.django_db
@@ -133,8 +127,7 @@ class TestAttendanceValidator:
         req = request_factory.post("/")
         req.tenant = tenant
         validator = AttendanceValidator(valid_data, req)
-        errors = []
-        validator._validate_clock_tampering(errors)
+        validator.validate_clock_tampering()
         assert validator.clock_skew_detected is False
 
     @pytest.mark.django_db
@@ -143,8 +136,7 @@ class TestAttendanceValidator:
         req = request_factory.post("/")
         req.tenant = tenant
         validator = AttendanceValidator(valid_data, req)
-        errors = []
-        validator._validate_clock_tampering(errors)
+        validator.validate_clock_tampering()
         assert validator.clock_skew_detected is True
 
     @pytest.mark.django_db
@@ -152,9 +144,8 @@ class TestAttendanceValidator:
         req = request_factory.post("/")
         req.tenant = tenant
         validator = AttendanceValidator(valid_data, req)
-        errors = []
-        validator._validate_duplicate(errors)
-        assert len(errors) > 0  # duplicate exists
+        validator.validate_duplicate()
+        assert len(validator.errors) > 0  # duplicate exists
 
     @pytest.mark.django_db
     def test_validate_gps_missing(self, valid_data, request_factory, tenant):
@@ -163,6 +154,5 @@ class TestAttendanceValidator:
         req = request_factory.post("/")
         req.tenant = tenant
         validator = AttendanceValidator(valid_data, req)
-        errors = []
-        validator._validate_gps(errors)
-        assert len(errors) > 0
+        validator.validate_gps()
+        assert len(validator.errors) > 0
