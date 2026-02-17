@@ -132,28 +132,17 @@ export function OnboardingPage() {
     if (!tenantSlug || !newDept.name) return;
     setSaving(true);
     try {
-      // Use a direct API call to create department
       const { default: api } = await import("@/services/api");
       const { data } = await api.post(`/tenants/departments/`, {
         name: newDept.name,
         name_ar: newDept.name_ar,
         tenant_slug: tenantSlug,
       });
-      setDepartments([...departments, data.data ?? data]);
+      const dept = data.data ?? data;
+      setDepartments([...departments, dept]);
       setNewDept({ name: "", name_ar: "" });
-    } catch {
-      // try alternative approach
-      try {
-        const { default: api } = await import("@/services/api");
-        const { data } = await api.post(`/${tenantSlug}/attendance/departments/`, {
-          name: newDept.name,
-          name_ar: newDept.name_ar,
-        });
-        setDepartments([...departments, data.data ?? data]);
-        setNewDept({ name: "", name_ar: "" });
-      } catch {
-        // silently fail
-      }
+    } catch (err) {
+      console.error("Failed to add department:", err);
     } finally {
       setSaving(false);
     }

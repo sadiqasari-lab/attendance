@@ -387,7 +387,7 @@ class AttendanceRecord(TenantBaseModel):
             ),
             models.Index(
                 fields=["tenant", "employee", "date"],
-                name="idx_attendance_tenant_emp_date",
+                name="idx_att_tenant_emp_date",
             ),
             models.Index(
                 fields=["tenant", "status", "date"],

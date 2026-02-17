@@ -12,6 +12,8 @@ import {
   CheckCircleIcon,
   Cog6ToothIcon,
   RocketLaunchIcon,
+  BuildingOffice2Icon,
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 
 interface NavItem {
@@ -59,6 +61,18 @@ export function Sidebar() {
       label: t("nav.approvals"),
       icon: CheckCircleIcon,
       roles: ["SUPER_ADMIN", "TENANT_ADMIN", "MANAGER"],
+    },
+    {
+      path: `/${slug}/reports`,
+      label: t("nav.reports"),
+      icon: ChartBarIcon,
+      roles: ["SUPER_ADMIN", "TENANT_ADMIN", "MANAGER"],
+    },
+    {
+      path: `/${slug}/tenant-setup`,
+      label: t("nav.tenant_setup"),
+      icon: BuildingOffice2Icon,
+      roles: ["SUPER_ADMIN", "TENANT_ADMIN"],
     },
     {
       path: `/${slug}/onboarding`,

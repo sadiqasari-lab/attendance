@@ -125,7 +125,11 @@ class DepartmentSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         """Ensure the parent department belongs to the same tenant."""
         parent = attrs.get("parent")
-        tenant = self.context.get("tenant") or attrs.get("tenant")
+        # Tenant can come from serializer context (set by the view) or
+        # from the instance being updated.
+        tenant = self.context.get("tenant")
+        if not tenant and self.instance:
+            tenant = self.instance.tenant
 
         if parent and tenant and parent.tenant_id != tenant.pk:
             raise serializers.ValidationError(

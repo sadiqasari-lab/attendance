@@ -81,11 +81,11 @@ class ApprovalRequest(TenantBaseModel):
         indexes = [
             models.Index(
                 fields=["tenant", "status", "created_at"],
-                name="idx_approval_tenant_status_date",
+                name="idx_appr_tnt_status_date",
             ),
             models.Index(
                 fields=["requester", "status"],
-                name="idx_approval_requester_status",
+                name="idx_appr_requester_status",
             ),
         ]
 

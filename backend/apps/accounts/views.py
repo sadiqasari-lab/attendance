@@ -174,13 +174,37 @@ class ChangePasswordView(generics.GenericAPIView):
 # Employee ViewSet
 # ---------------------------------------------------------------
 class EmployeeViewSet(TenantQuerySetMixin, AuditLogMixin, viewsets.ModelViewSet):
-    """CRUD operations for employees, scoped to the current tenant."""
+    """CRUD operations for employees, scoped to the current tenant.
+
+    The tenant can be resolved from:
+      1. ``request.tenant`` (set by TenantMiddleware for path-based URLs)
+      2. ``tenant_slug`` query-parameter or request-body field (for the
+         tenant-exempt ``/api/v1/tenants/employees/`` endpoint)
+    """
 
     queryset = Employee.objects.select_related("user", "department", "tenant").all()
     permission_classes = [IsAuthenticated, IsTenantAdmin]
     filterset_fields = ["is_active", "department", "user__role"]
     search_fields = ["employee_id", "user__email", "user__first_name", "user__last_name"]
     ordering_fields = ["employee_id", "date_of_joining", "created_at"]
+
+    def _resolve_tenant(self):
+        """Return the Tenant from the request or from tenant_slug."""
+        from apps.tenants.models import Tenant
+
+        tenant = getattr(self.request, "tenant", None)
+        if tenant:
+            return tenant
+        slug = (
+            self.request.query_params.get("tenant_slug")
+            or self.request.data.get("tenant_slug")
+        )
+        if slug:
+            try:
+                return Tenant.objects.get(slug=slug, is_deleted=False)
+            except Tenant.DoesNotExist:
+                return None
+        return None
 
     def get_serializer_class(self):
         if self.action in ("create", "update", "partial_update"):
@@ -192,8 +216,20 @@ class EmployeeViewSet(TenantQuerySetMixin, AuditLogMixin, viewsets.ModelViewSet)
             return [IsAuthenticated(), IsEmployee()]
         return [IsAuthenticated(), IsTenantAdmin()]
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        tenant = self._resolve_tenant()
+        if tenant:
+            qs = qs.filter(tenant=tenant)
+        return qs
+
     def perform_create(self, serializer):
-        tenant = getattr(self.request, "tenant", None)
+        tenant = self._resolve_tenant()
+        if not tenant:
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError(
+                {"tenant_slug": "A valid tenant_slug is required to create an employee."}
+            )
         instance = serializer.save(
             tenant=tenant,
             created_by=self.request.user,

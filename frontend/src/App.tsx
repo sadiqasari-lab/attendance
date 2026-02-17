@@ -17,6 +17,8 @@ import { GeofencesPage } from "@/modules/admin/GeofencesPage";
 import { DevicesPage } from "@/modules/admin/DevicesPage";
 import { SettingsPage } from "@/modules/settings/SettingsPage";
 import { ApprovalsPage } from "@/modules/approvals/ApprovalsPage";
+import { ReportsPage } from "@/modules/reports/ReportsPage";
+import { TenantSetupPage } from "@/modules/tenant-setup/TenantSetupPage";
 import { OnboardingPage } from "@/modules/onboarding/OnboardingPage";
 
 function App() {
@@ -83,6 +85,22 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={["SUPER_ADMIN", "TENANT_ADMIN", "MANAGER"]}>
                 <ApprovalsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="reports"
+            element={
+              <ProtectedRoute allowedRoles={["SUPER_ADMIN", "TENANT_ADMIN", "MANAGER"]}>
+                <ReportsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="tenant-setup"
+            element={
+              <ProtectedRoute allowedRoles={["SUPER_ADMIN", "TENANT_ADMIN"]}>
+                <TenantSetupPage />
               </ProtectedRoute>
             }
           />

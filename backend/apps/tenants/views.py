@@ -4,8 +4,10 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from apps.core.mixins import AuditLogMixin, TenantQuerySetMixin
+from apps.core.models import AuditLog
 from apps.core.pagination import StandardPagination
 from apps.core.permissions import IsSuperAdmin, IsTenantAdmin
+from apps.core.utils import get_client_ip
 
 from apps.tenants.models import Department, Group, Tenant
 from apps.tenants.serializers import (
@@ -105,7 +107,10 @@ class DepartmentViewSet(
     """CRUD for departments within the current tenant.
 
     Uses TenantQuerySetMixin to automatically scope querysets to the
-    request's tenant.
+    request's tenant.  The tenant can be resolved from:
+      1. ``request.tenant`` (set by TenantMiddleware for path-based URLs)
+      2. ``tenant_slug`` query-parameter or request-body field (for the
+         tenant-exempt ``/api/v1/tenants/departments/`` endpoint)
     """
 
     queryset = Department.objects.filter(is_deleted=False)
@@ -114,8 +119,30 @@ class DepartmentViewSet(
     pagination_class = StandardPagination
     lookup_field = "pk"
 
+    def _resolve_tenant(self):
+        """Return the Tenant from the request or from tenant_slug."""
+        tenant = getattr(self.request, "tenant", None)
+        if tenant:
+            return tenant
+        # Fall back to tenant_slug from query params or body
+        slug = (
+            self.request.query_params.get("tenant_slug")
+            or self.request.data.get("tenant_slug")
+        )
+        if slug:
+            try:
+                return Tenant.objects.get(slug=slug, is_deleted=False)
+            except Tenant.DoesNotExist:
+                return None
+        return None
+
     def get_queryset(self):
         qs = super().get_queryset()
+
+        # Scope to tenant (supports both middleware-set and slug-resolved)
+        tenant = self._resolve_tenant()
+        if tenant:
+            qs = qs.filter(tenant=tenant)
 
         # Optional filters
         is_active = self.request.query_params.get("is_active")
@@ -131,11 +158,25 @@ class DepartmentViewSet(
         return qs
 
     def perform_create(self, serializer):
-        """Attach the current tenant automatically on creation."""
-        tenant = getattr(self.request, "tenant", None)
+        """Attach the resolved tenant automatically on creation."""
+        tenant = self._resolve_tenant()
+        if not tenant:
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError(
+                {"tenant_slug": "A valid tenant_slug is required to create a department."}
+            )
         instance = serializer.save(
             tenant=tenant,
             created_by=self.request.user,
         )
-        self._log_audit("CREATE", instance)
+        # Audit log
+        AuditLog.objects.create(
+            tenant=tenant,
+            user=self.request.user if self.request.user.is_authenticated else None,
+            action="CREATE",
+            resource_type="Department",
+            resource_id=instance.pk,
+            ip_address=get_client_ip(self.request),
+            user_agent=self.request.META.get("HTTP_USER_AGENT", ""),
+        )
         return instance
