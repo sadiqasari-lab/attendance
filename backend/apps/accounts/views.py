@@ -21,6 +21,7 @@ from .serializers import (
     CustomTokenObtainPairSerializer,
     EmployeeCreateSerializer,
     EmployeeSerializer,
+    EmployeeWithUserCreateSerializer,
     ProfileSerializer,
 )
 
@@ -187,7 +188,9 @@ class EmployeeViewSet(TenantQuerySetMixin, AuditLogMixin, viewsets.ModelViewSet)
     ordering_fields = ["employee_id", "date_of_joining", "created_at"]
 
     def get_serializer_class(self):
-        if self.action in ("create", "update", "partial_update"):
+        if self.action == "create":
+            return EmployeeWithUserCreateSerializer
+        if self.action in ("update", "partial_update"):
             return EmployeeCreateSerializer
         return EmployeeSerializer
 
@@ -196,12 +199,14 @@ class EmployeeViewSet(TenantQuerySetMixin, AuditLogMixin, viewsets.ModelViewSet)
             return [IsAuthenticated(), IsEmployee()]
         return [IsAuthenticated(), IsTenantAdmin()]
 
+    def get_serializer_context(self):
+        ctx = super().get_serializer_context()
+        ctx["tenant"] = getattr(self.request, "tenant", None)
+        ctx["created_by"] = self.request.user
+        return ctx
+
     def perform_create(self, serializer):
-        tenant = getattr(self.request, "tenant", None)
-        instance = serializer.save(
-            tenant=tenant,
-            created_by=self.request.user,
-        )
+        instance = serializer.save()
         self._log_audit("CREATE", instance)
         return instance
 

@@ -146,6 +146,76 @@ class EmployeeCreateSerializer(serializers.ModelSerializer):
         return super().update(instance, validated_data)
 
 
+class EmployeeWithUserCreateSerializer(serializers.Serializer):
+    """Create a User and Employee record in a single request."""
+
+    # User fields
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, style={"input_type": "password"})
+    first_name = serializers.CharField(required=False, default="", allow_blank=True)
+    last_name = serializers.CharField(required=False, default="", allow_blank=True)
+    first_name_ar = serializers.CharField(required=False, default="", allow_blank=True)
+    last_name_ar = serializers.CharField(required=False, default="", allow_blank=True)
+    phone = serializers.CharField(required=False, default="", allow_blank=True)
+    role = serializers.ChoiceField(
+        choices=User.ROLE_CHOICES, required=False, default="EMPLOYEE"
+    )
+
+    # Employee fields
+    employee_id = serializers.CharField(max_length=50)
+    department = serializers.UUIDField(required=False, allow_null=True, default=None)
+    designation = serializers.CharField(required=False, default="", allow_blank=True)
+    designation_ar = serializers.CharField(required=False, default="", allow_blank=True)
+    date_of_joining = serializers.DateField(required=False, allow_null=True, default=None)
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value
+
+    def validate_password(self, value):
+        password_validation.validate_password(value)
+        return value
+
+    def validate_department(self, value):
+        if value is not None:
+            from apps.tenants.models import Department
+
+            if not Department.objects.filter(pk=value).exists():
+                raise serializers.ValidationError("Department does not exist.")
+        return value
+
+    def create(self, validated_data):
+        from django.db import transaction
+
+        from apps.tenants.models import Department
+
+        dept_id = validated_data.pop("department", None)
+        employee_id_val = validated_data.pop("employee_id")
+        designation = validated_data.pop("designation", "")
+        designation_ar = validated_data.pop("designation_ar", "")
+        date_of_joining = validated_data.pop("date_of_joining", None)
+        password = validated_data.pop("password")
+
+        with transaction.atomic():
+            user = User(**validated_data)
+            user.set_password(password)
+            user.save()
+
+            dept = Department.objects.get(pk=dept_id) if dept_id else None
+            employee = Employee.objects.create(
+                user=user,
+                employee_id=employee_id_val,
+                department=dept,
+                designation=designation,
+                designation_ar=designation_ar,
+                date_of_joining=date_of_joining,
+                tenant=self.context.get("tenant"),
+                created_by=self.context.get("created_by"),
+            )
+        return employee
+
+
 # ---------------------------------------------------------------
 # Authentication Serializers
 # ---------------------------------------------------------------
