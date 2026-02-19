@@ -75,12 +75,19 @@ class TenantViewSet(AuditLogMixin, viewsets.ModelViewSet):
 
     def check_permissions(self, request):
         """
-        Allow TenantAdmin read access but restrict writes to SuperAdmin.
+        Allow TenantAdmin read access and updates to their own tenant.
+        Creation and deletion are restricted to SuperAdmin.
         """
         super().check_permissions(request)
         if request.method not in ("GET", "HEAD", "OPTIONS"):
-            if not IsSuperAdmin().has_permission(request, self):
-                self.permission_denied(request)
+            if IsSuperAdmin().has_permission(request, self):
+                return
+            # TenantAdmins may update (PUT/PATCH) their own tenant
+            if request.method in ("PUT", "PATCH") and IsTenantAdmin().has_permission(
+                request, self
+            ):
+                return
+            self.permission_denied(request)
 
     @action(detail=True, methods=["get"])
     def stats(self, request, pk=None):

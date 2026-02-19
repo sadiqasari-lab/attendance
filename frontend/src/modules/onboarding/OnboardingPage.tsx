@@ -34,13 +34,15 @@ export function OnboardingPage() {
   const { t } = useTranslation();
   const { tenantSlug } = useParams<{ tenantSlug: string }>();
   const navigate = useNavigate();
-  const { tenant } = useAuthStore();
+  const { tenant, setTenant } = useAuthStore();
   const effectiveSlug = tenantSlug || tenant?.slug;
 
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [completed, setCompleted] = useState(false);
+  const [tenantId, setTenantId] = useState<string | null>(tenant?.id ?? null);
+  const [saveError, setSaveError] = useState("");
 
   // Step 1: Company Info
   const [companyInfo, setCompanyInfo] = useState<CompanyInfo>({
@@ -80,7 +82,6 @@ export function OnboardingPage() {
   // Load existing data
   useEffect(() => {
     if (!effectiveSlug) {
-      // No tenant yet — this is a fresh setup, skip loading and go straight to form
       setLoading(false);
       return;
     }
@@ -88,17 +89,27 @@ export function OnboardingPage() {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Load tenant info
-        if (tenant) {
-          setCompanyInfo({
-            name: tenant.name ?? "",
-            name_ar: "",
-            email: "",
-            phone: "",
-            timezone: "Asia/Riyadh",
-            country: "SA",
-            city: "",
-          });
+        // Load full tenant info from API
+        if (tenant?.id) {
+          try {
+            const fullTenant = await tenantService.getTenant(tenant.id);
+            setTenantId(fullTenant.id);
+            setCompanyInfo({
+              name: fullTenant.name ?? "",
+              name_ar: fullTenant.name_ar ?? "",
+              email: fullTenant.email ?? "",
+              phone: fullTenant.phone ?? "",
+              timezone: fullTenant.timezone || "Asia/Riyadh",
+              country: fullTenant.country || "SA",
+              city: fullTenant.city ?? "",
+            });
+          } catch {
+            // Fallback to auth store info
+            setCompanyInfo((prev) => ({
+              ...prev,
+              name: tenant.name ?? "",
+            }));
+          }
         }
 
         // Load existing departments
@@ -130,14 +141,42 @@ export function OnboardingPage() {
     };
 
     loadData();
-  }, [effectiveSlug, tenant]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveSlug]);
+
+  // Save company info to backend
+  const saveCompanyInfo = async () => {
+    if (!tenantId || !companyInfo.name) return;
+    setSaving(true);
+    setSaveError("");
+    try {
+      const updated = await tenantService.updateTenant(tenantId, {
+        name: companyInfo.name,
+        name_ar: companyInfo.name_ar,
+        email: companyInfo.email,
+        phone: companyInfo.phone,
+        timezone: companyInfo.timezone,
+        country: companyInfo.country,
+        city: companyInfo.city,
+      });
+      // Update the auth store so sidebar reflects the new name
+      setTenant({
+        id: updated.id,
+        name: updated.name,
+        slug: updated.slug,
+      });
+    } catch {
+      setSaveError(t("common.error"));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // Step actions
   const handleAddDepartment = async () => {
     if (!effectiveSlug || !newDept.name) return;
     setSaving(true);
     try {
-      // Use a direct API call to create department
       const { default: api } = await import("@/services/api");
       const { data } = await api.post(`/tenants/departments/`, {
         name: newDept.name,
@@ -147,7 +186,6 @@ export function OnboardingPage() {
       setDepartments([...departments, data.data ?? data]);
       setNewDept({ name: "", name_ar: "" });
     } catch {
-      // try alternative approach
       try {
         const { default: api } = await import("@/services/api");
         const { data } = await api.post(`/${effectiveSlug}/attendance/departments/`, {
@@ -236,7 +274,19 @@ export function OnboardingPage() {
     }
   };
 
-  const handleFinish = () => {
+  const handleNext = async () => {
+    // Save company info when leaving Step 1
+    if (currentStep === 1) {
+      await saveCompanyInfo();
+    }
+    setCurrentStep(currentStep + 1);
+  };
+
+  const handleFinish = async () => {
+    // Save company info if user jumps directly to finish from step 1
+    if (tenantId && companyInfo.name) {
+      await saveCompanyInfo();
+    }
     setCompleted(true);
   };
 
@@ -345,6 +395,13 @@ export function OnboardingPage() {
         {currentStep === 1 && (
           <div className="space-y-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">{t("onboarding.step1_desc")}</p>
+
+            {saveError && (
+              <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                {saveError}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -765,16 +822,25 @@ export function OnboardingPage() {
 
         {currentStep < TOTAL_STEPS ? (
           <button
-            onClick={() => setCurrentStep(currentStep + 1)}
+            onClick={handleNext}
+            disabled={saving}
             className="btn-primary flex items-center gap-1"
           >
-            {t("onboarding.next")}
+            {saving ? t("common.loading") : t("onboarding.next")}
             <ArrowRightIcon className="h-4 w-4" />
           </button>
         ) : (
-          <button onClick={handleFinish} className="btn-primary flex items-center gap-1">
-            <CheckIcon className="h-4 w-4" />
-            {t("onboarding.finish")}
+          <button
+            onClick={handleFinish}
+            disabled={saving}
+            className="btn-primary flex items-center gap-1"
+          >
+            {saving ? t("common.loading") : (
+              <>
+                <CheckIcon className="h-4 w-4" />
+                {t("onboarding.finish")}
+              </>
+            )}
           </button>
         )}
       </div>

@@ -125,14 +125,14 @@ export function Sidebar() {
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-gray-200 px-6 dark:border-gray-700">
         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-600 text-white font-bold text-sm">
-          IA
+          {tenant?.name ? tenant.name.substring(0, 2).toUpperCase() : "IA"}
         </div>
         <div>
           <p className="text-sm font-semibold text-gray-900 dark:text-white">
-            {t("app.title")}
+            {tenant?.name ?? t("app.title")}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            {tenant?.name ?? t("app.subtitle")}
+            {t("app.subtitle")}
           </p>
         </div>
       </div>

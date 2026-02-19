@@ -14,6 +14,11 @@ export const tenantService = {
     return data.data ?? data;
   },
 
+  async updateTenant(id: string, payload: Partial<Tenant>): Promise<Tenant> {
+    const { data } = await api.patch(`/tenants/${id}/`, payload);
+    return data.data ?? data;
+  },
+
   async getDepartments(tenantSlug: string): Promise<PaginatedResponse<Department>> {
     const { data } = await api.get(`/tenants/departments/?tenant_slug=${tenantSlug}`);
     return data;
