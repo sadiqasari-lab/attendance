@@ -158,7 +158,7 @@ class EmployeeWithUserCreateSerializer(serializers.Serializer):
     last_name_ar = serializers.CharField(required=False, default="", allow_blank=True)
     phone = serializers.CharField(required=False, default="", allow_blank=True)
     role = serializers.ChoiceField(
-        choices=User.ROLE_CHOICES, required=False, default="EMPLOYEE"
+        choices=User.Role.choices, required=False, default="EMPLOYEE"
     )
 
     # Employee fields
