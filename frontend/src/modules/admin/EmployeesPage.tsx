@@ -54,6 +54,7 @@ export function EmployeesPage() {
 
   useEffect(() => {
     fetchEmployees();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tenantSlug]);
 
   useEffect(() => {
