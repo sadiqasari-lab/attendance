@@ -45,6 +45,7 @@ export function ReportsPage() {
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tenantSlug, dateFrom, dateTo, statusFilter, reportType]);
 
   useEffect(() => {
