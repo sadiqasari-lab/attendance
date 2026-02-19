@@ -40,6 +40,7 @@ class ApprovalRequestViewSet(TenantQuerySetMixin, AuditLogMixin, ModelViewSet):
       current tenant (admin/manager) or for the current user (employee).
     """
 
+    queryset = ApprovalRequest.objects.all()
     lookup_field = "pk"
 
     # ------------------------------------------------------------------
@@ -136,7 +137,7 @@ class ApprovalRequestViewSet(TenantQuerySetMixin, AuditLogMixin, ModelViewSet):
     # Custom actions
     # ------------------------------------------------------------------
     @action(detail=True, methods=["post"], url_path="approve")
-    def approve(self, request, pk=None):
+    def approve(self, request, pk=None, **kwargs):
         """Approve a pending approval request."""
         instance = self.get_object()
 
@@ -171,7 +172,7 @@ class ApprovalRequestViewSet(TenantQuerySetMixin, AuditLogMixin, ModelViewSet):
         )
 
     @action(detail=True, methods=["post"], url_path="reject")
-    def reject(self, request, pk=None):
+    def reject(self, request, pk=None, **kwargs):
         """Reject a pending approval request."""
         instance = self.get_object()
 
@@ -206,7 +207,7 @@ class ApprovalRequestViewSet(TenantQuerySetMixin, AuditLogMixin, ModelViewSet):
         )
 
     @action(detail=True, methods=["post"], url_path="cancel")
-    def cancel(self, request, pk=None):
+    def cancel(self, request, pk=None, **kwargs):
         """
         Cancel a pending approval request.
 
@@ -242,7 +243,7 @@ class ApprovalRequestViewSet(TenantQuerySetMixin, AuditLogMixin, ModelViewSet):
         )
 
     @action(detail=False, methods=["get"], url_path="pending-count")
-    def pending_count(self, request):
+    def pending_count(self, request, **kwargs):
         """
         Return the count of pending approval requests.
 
@@ -282,5 +283,3 @@ class ApprovalRequestViewSet(TenantQuerySetMixin, AuditLogMixin, ModelViewSet):
             user_agent=self.request.META.get("HTTP_USER_AGENT", ""),
         )
 
-    class Meta:
-        model = ApprovalRequest
